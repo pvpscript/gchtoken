@@ -14,3 +14,4 @@ python3 gchtoken.py token1 [token2 [token3 [... [tokenN]]]]
 2. Add parameters with argparse: (-l --login [ask for login credentials]; -a --accounts accounts-file.txt [parse an account file, that contains logins and passwords, in the toml format (use tomllib)]
 3. Add toml file parsing
 4. Improve readme for the new features
+5. Make it asynchronous! https://www.twilio.com/blog/asynchronous-http-requests-in-python-with-aiohttp
