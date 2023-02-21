@@ -13,6 +13,8 @@ from types import TracebackType
 from html.parser import HTMLParser
 from collections.abc import Iterator, Sequence
 
+import input_parser
+
 @dataclass
 class Account:
     username: str
