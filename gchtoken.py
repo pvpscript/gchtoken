@@ -7,7 +7,7 @@ import random
 from requests import Session
 from dataclasses import dataclass
 from getpass import getpass
-from typing import Optional, Type
+from typing import Optional, Type, Dict, Any, List
 from types import TracebackType
 
 from html.parser import HTMLParser
@@ -85,8 +85,9 @@ class Login:
 
         return self._login(acc)
 
-    def login_all(self) -> Map[str, Session]:
-        return {account: self._login(account) for account in self._accounts}
+    def login_all(self) -> Dict[str, Session]:
+        return {account.username: self._login(account)
+                for account in self._accounts}
 
 class TokenHandler:
     TOKEN_URL = "https://chasehistory.net/Token/Redeem"
@@ -128,7 +129,7 @@ class TokenHandler:
         self._tokens = tokens
 
     def _parse_token_content(self, html: str) -> str:
-        parser = _SuccessParser()
+        parser = self._SuccessParser()
         parser.feed(html)
 
         return parser.success_data
