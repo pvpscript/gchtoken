@@ -7,31 +7,11 @@ import random
 from requests import Session
 from dataclasses import dataclass
 from getpass import getpass
+from typing import Optional, Type
+from types import TracebackType
 
 from html.parser import HTMLParser
-from collections.abc import Iterator
-
-class SuccessParser(HTMLParser):
-    _div_tag = False
-    _content_flag = False
-    _success_data = None
-
-    def handle_starttag(self, tag, attrs):
-        if not self._div_tag:
-            if (tag == "div" and attrs[0][0] == "class" and
-                    attrs[0][1].split(' ')[0] == "token-redeem-content-form"): 
-                self._div_tag = True
-        elif tag == "pre":
-            self._content_flag = True
-
-    def handle_data(self, data):
-        if self._content_flag:
-            self._content_flag = False
-            self._success_data = data
-
-    @property
-    def success_data(self):
-        return self._success_data
+from collections.abc import Iterator, Sequence
 
 @dataclass
 class Account:
@@ -40,7 +20,6 @@ class Account:
 
 class Login:
     LOGIN_URL = "https://chasehistory.net/Auth/Login"
-    TOKEN_URL = "https://chasehistory.net/Token/Redeem"
 
     def __init__(self, accounts: list[Account]):
         self._accounts = accounts
@@ -50,7 +29,12 @@ class Login:
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType]
+    ) -> bool:
         for _, v in self._sessions.items():
             v.close()
 
@@ -65,7 +49,7 @@ class Login:
             'PHPSESSID': phpsessid
         }
 
-    def _login(self, account: Account) -> None:
+    def _login(self, account: Account) -> Optional[Session]:
         username = account.username
         login_data = {
             'login': username,
@@ -81,19 +65,70 @@ class Login:
 
         if (code := login_res.status_code) != 200:
             print(f"Request error. Status: {code}", file=sys.stderr)
-            return None
+            return None 
 
         login_res_dict = login_res.json()
 
         if (login_res_dict := login_res.json())['code'] == 0:
             print(f"Login error for '{username}': {login_res_dict['msg']}",
                   file=sys.stderr)
-            return None
+            return None 
 
         print(f"Login successful for username: {username}")
 
+        return session
+
+
+    def login(username: str) -> Optional[Session]:
+        if (acc := next((i for i in accounts if i.username == username), None)):
+            return None
+
+        return self._login(acc)
+
+    def login_all(self) -> Map[str, Session]:
+        return {account: self._login(account) for account in self._accounts}
+
+class TokenHandler:
+    TOKEN_URL = "https://chasehistory.net/Token/Redeem"
+
+    class _SuccessParser(HTMLParser):
+        _div_tag = False
+        _content_flag = False
+        _success_data = None
+
+        def _is_token_form(
+            self,
+            tag: str,
+            attrs: Sequence[tuple[Any, ...]]
+        ) -> bool:
+            return (tag == "div" and attrs[0][0] == "class" and
+                    attrs[0][1].split(' ')[0] == "token-redeem-content-form")
+
+        def handle_starttag(
+            self,
+            tag: str,
+            attrs: Sequence[tuple[Any, ...]]
+        ) -> None:
+            if not self._div_tag:
+                if self._is_token_form(tag, attrs):
+                    self._div_tag = True
+            elif tag == "pre":
+                self._content_flag = True
+
+        def handle_data(self, data: str):
+            if self._content_flag:
+                self._content_flag = False
+                self._success_data = data
+
+        @property
+        def success_data(self):
+            return self._success_data
+
+    def __init__(self, tokens: List[str] = []):
+        self._tokens = tokens
+
     def _parse_token_content(self, html: str) -> str:
-        parser = SuccessParser()
+        parser = _SuccessParser()
         parser.feed(html)
 
         return parser.success_data
@@ -113,27 +148,13 @@ class Login:
         else:
             return self._parse_token_content(token_res.text)
 
-    def login(username: str) -> None:
-        if (acc := next((i for i in accounts if i.username == username), None)):
-            return None
+    def redeem_tokens(self, session: Session) -> None:
+        for token in self._tokens:
+            result = self._redeem_token(session, token).rstrip()
 
-        return self._login(acc)
+            print(f"Token: {token}")
+            print(f"{result}\n")
 
-    def login_all(self) -> None:
-        for account in self._accounts:
-            self._login(account)
-
-    def redeem_tokens(self, tokens: list[str]) -> Iterator[str]:
-        for username, session in self._sessions.items():
-            print(f"\nUser: {username}")
-
-            for token in tokens:
-                result = self._redeem_token(session, token)
-
-                print(f"Token: {token}")
-                print(f"{result.rstrip()}\n")
-
-            print("--------------------\n")
 
 if __name__ == '__main__':
     accounts = []
@@ -148,7 +169,14 @@ if __name__ == '__main__':
         if input("more? (y/n)").lower() != 'y':
             break
 
-    with Login(accounts) as login:
-        login.login_all()
+    token_handler = TokenHandler(tokens=sys.argv[1:])
 
-        login.redeem_tokens(sys.argv[1:])
+    with Login(accounts) as login:
+        login_result = login.login_all()
+
+        for username, session in login_result.items():
+            print(f"Redeeming for username: {username}")
+            token_handler.redeem_tokens(session)
+
+            print("--------------------\n")
+
