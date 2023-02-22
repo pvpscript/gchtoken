@@ -41,10 +41,10 @@ Will run the login process for every account that is present on `login_file.txt`
 and redeem every given token for every successfully logged in account.
 ### Example: login file
 ```
-username1 = password1
-username2 = password2
+username1 = "password1"
+username2 = "password2"
 ...
-usernameN = passwordN
+usernameN = "passwordN"
 ```
 
 # TODO
