@@ -46,10 +46,3 @@ username2 = "password2"
 ...
 usernameN = "passwordN"
 ```
-
-# TODO
-1. Create `Token` class to handle tokens for a given Login and separate each class in its own file (will need refactoring) **DONE**
-2. Add parameters with argparse: (-l --login [ask for login credentials]; -a --accounts accounts-file.txt [parse an account file, that contains logins and passwords, in the toml format (use tomllib)] **DONE**
-3. Add toml file parsing **DONE**
-4. Improve readme for the new features **DONE**
-5. Make it asynchronous! https://www.twilio.com/blog/asynchronous-http-requests-in-python-with-aiohttp
