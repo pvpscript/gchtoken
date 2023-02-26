@@ -108,5 +108,5 @@ class LoginHandler:
         return self._login(acc)
 
     def login_all(self) -> Dict[str, Session]:
-        return {account.username: self._login(account)
-                for account in self._accounts}
+        return {account.username: session for account in self._accounts
+                if (session := self._login(account)) is not None}
