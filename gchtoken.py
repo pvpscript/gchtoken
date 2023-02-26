@@ -9,21 +9,17 @@ from gch_token.token_handler import TokenHandler
 from utils.input_parser import make_parser
 
 if __name__ == '__main__':
-    accounts = []
-    while True:
-        username = input("Username: ")
-        password = getpass("Password: ")
+    parser = make_parser()
+    args = parser.parse_args()
 
-        accounts.append(
-            Account(username=username, password=password)
-        )
+    token_handler = TokenHandler(tokens=args.tokens)
 
-        if input("more? (y/n)").lower() != 'y':
-            break
+    with LoginHandler() as login:
+        if args.interactive_login:
+            login.interactive_login()
+        else:
+            login.file_login(args.file_login[0])
 
-    token_handler = TokenHandler(tokens=sys.argv[1:])
-
-    with LoginHandler(accounts) as login:
         login_result = login.login_all()
 
         for username, session in login_result.items():
