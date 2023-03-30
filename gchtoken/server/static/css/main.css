@@ -1,0 +1,40 @@
+body {
+    font-family: "Lucida", Courier, monospace;
+    background: #dfdfdf;
+}
+
+.form-content {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    align-content: space-between;
+    grid-gap: 1rem;
+
+    border: 2px solid #c1c1c1;
+    padding: 1rem;
+    margin: auto;
+    width: 70%;
+    background: #f9f9f9;
+}
+
+label {
+    justify-self: right;
+    grid-column: 1 / 2;
+
+    padding: 0.5rem;
+}
+
+input {
+    justify-self: stretch;
+    grid-column: 2 / 3;
+
+    border: 1px solid #9c9c9c;
+}
+
+button {
+    grid-column: 1 / 3;
+    justify-self: center;
+
+    padding: 0.7rem;
+    border: 1px solid gray;
+    background-color: lightgray;
+}

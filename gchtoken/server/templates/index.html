@@ -1,5 +1,17 @@
 <html>
+    <head>
+        <title>Redeem token</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    </head>
     <body>
-        <h1>Token page</h1>
+        <form method="post">
+            <div class="form-content">
+                <label for="token">Token:</label>
+                <input type="text" name="token">
+                <label for="password">Password:</label>
+                <input type="password" name="password">
+                <button type="submit">Redeem!</button>
+            </div>
+        </form>
     </body>
 </html>
