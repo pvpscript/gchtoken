@@ -9,6 +9,3 @@ def redeem_token():
         print(f"Password: {request.form['password']}")
 
     return render_template('index.html')
-
-if __name__ == "__main__":
-    app.run()
