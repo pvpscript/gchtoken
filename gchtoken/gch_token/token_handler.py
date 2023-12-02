@@ -8,7 +8,7 @@ from html.parser import HTMLParser
 from collections.abc import Iterator, Sequence
 
 class TokenHandler:
-    TOKEN_URL = "https://chasehistory.net/Token/Redeem"
+    TOKEN_URL = "https://chasehistory.xyz/Token/Redeem"
 
     class _SuccessParser(HTMLParser):
         _div_tag = False

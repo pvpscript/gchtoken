@@ -12,7 +12,7 @@ from typing import Optional, Type, Dict
 from types import TracebackType
 
 class LoginHandler:
-    LOGIN_URL = "https://chasehistory.net/Auth/Login"
+    LOGIN_URL = "https://chasehistory.xyz/Auth/Login"
 
     def __init__(self):
         self._accounts: List[Account] = []
